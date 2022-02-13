@@ -145,7 +145,7 @@ app.get('/api/users/:_id/logs', function (req, res) {
 
     let query = {};
     let exercises = [];
-    if (req.query) {
+    if (req.query && req.query.from && req.query.to && req.query.limit) {
 
       let fromDate = new Date(req.query.from);
       let toDate = new Date(req.query.to);
@@ -162,9 +162,9 @@ app.get('/api/users/:_id/logs', function (req, res) {
 
     log.log = exercises.map(e => {
         return {
-          description: e.description,
-          duration: e.duration,
-        date: e.date
+          description: `${e.description}`,
+          duration: parseInt(e.duration),
+         date: e.date
       }
     });
 
