@@ -6,6 +6,7 @@ var express = require('express');
 var app = express();
 var dns = require('dns');
 var url = require('url');
+const crypto = require("crypto");
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -17,7 +18,7 @@ app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+  res.sendFile(__dirname + '/views/exercise.html');
 });
 
 // Parse URL-encoded bodies (as sent by HTML forms)
@@ -66,6 +67,111 @@ app.get('/api/shorturl/:short_url', function(req, res){
     if (given) {
       res.redirect(given.original_url);
     }
+  }
+});
+
+let users = [];
+
+app.post('/api/users', function (req, res) {
+  var username = req.body.username;
+  let newUser = {
+    _id: crypto.randomBytes(16).toString("hex"),
+    username: username,
+    exercises: []
+  }
+  users.push(newUser);
+  res.json({_id: newUser._id, username: newUser.username});
+});
+
+app.get('/api/users', function (req, res) {
+  res.json(users.map(u => {
+    return {
+    _id: u._id,
+     username: u.username }
+    }));
+});
+
+app.post('/api/users/:_id/exercises', function (req, res) {
+  try {
+    if (!req.params._id) {
+      return res.json({error: "invalid request"})
+    }
+
+    let user = (users.filter(u => u._id == req.params._id)||[])[0]
+    if (!user) {
+      return res.json({error: "invalid user id"})
+    }
+
+    let exercise = {};
+    exercise.description = req.body.description;
+    exercise.duration = parseInt(req.body.duration);
+    exercise.date = req.body.date;
+
+    if (!exercise.date) {
+      exercise.date = new Date().toDateString();
+    }
+    else {
+      exercise.date = new Date(exercise.date).toDateString();
+    }
+
+    exercise.username = user.username;
+    exercise._id = user._id;
+    user.exercises.push(exercise)
+
+    res.json(exercise);
+  }
+  catch(err) {
+    return res.json({error: "invalid request"})
+  }
+});
+
+app.get('/api/users/:_id/logs', function (req, res) {
+  try {
+    if (!req.params._id) {
+      return res.json({error: "invalid request"})
+    }
+
+    let user = (users.filter(u => u._id == req.params._id)||[])[0]
+    if (!user) {
+      return res.json({error: "invalid user id"})
+    }
+
+    let log = {
+      username: user.username,
+      _id: user._id,
+      count: user.exercises.length,
+      log: []
+    };
+
+    let query = {};
+    let exercises = [];
+    if (req.query) {
+
+      let fromDate = new Date(req.query.from);
+      let toDate = new Date(req.query.to);
+      let limit = parseInt(req.query.limit);
+
+      exercises = user.exercises.filter((e, index) => {
+        return new Date(e.date).getTime() >= fromDate.getTime() && new Date(e.date) <= toDate.getTime() && index < limit;
+      });
+     
+    }
+    else {
+      exercises = user.exercises;
+    }
+
+    log.log = exercises.map(e => {
+        return {
+          description: e.description,
+          duration: e.duration,
+        date: e.date
+      }
+    });
+
+    res.json(log);
+  }
+  catch(err) {
+    return res.json({error: "invalid request"})
   }
 });
 
