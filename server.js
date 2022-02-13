@@ -145,11 +145,11 @@ app.get('/api/users/:_id/logs', function (req, res) {
 
     let query = {};
     let exercises = [];
-    if (req.query && req.query.from && req.query.to && req.query.limit) {
+    if (req.query && (req.query.from || req.query.to || req.query.limit)) {
 
-      let fromDate = new Date(req.query.from);
-      let toDate = new Date(req.query.to);
-      let limit = parseInt(req.query.limit);
+      let fromDate = req.query.from ? new Date(req.query.from): new Date(0);
+      let toDate = req.query.to ? new Date(req.query.to) : new Date(8640000000000000);
+      let limit = req.query.limit ? parseInt(req.query.limit) : Number.MAX_SAFE_INTEGER;
 
       exercises = user.exercises.filter((e, index) => {
         return new Date(e.date).getTime() >= fromDate.getTime() && new Date(e.date) <= toDate.getTime() && index < limit;
