@@ -7,6 +7,8 @@ var app = express();
 var dns = require('dns');
 var url = require('url');
 const crypto = require("crypto");
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -18,7 +20,7 @@ app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/exercise.html');
+  res.sendFile(__dirname + '/views/fileupload.html');
 });
 
 // Parse URL-encoded bodies (as sent by HTML forms)
@@ -175,6 +177,15 @@ app.get('/api/users/:_id/logs', function (req, res) {
   }
 });
 
+app.post('/api/fileanalyse', upload.single('upfile'), (req, res, next) => {
+  const file = req.file
+  if (!file) {
+    const error = new Error('Please upload a file')
+    error.httpStatusCode = 400
+    return next(error)
+  }
+  res.json({"name":file.originalname,"type":file.mimetype,"size":file.size});
+})
 
 app.get("/api/:date?", function (req, res) {
 
