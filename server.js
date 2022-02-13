@@ -24,9 +24,42 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get("/api/:date?", function (req, res) {
+
+  let response = {};
+  let dateParam = null;
+  let date = null;
+
+  //no param
+  if (!req.params.date) {
+    date = new Date();
+  }
+
+  //could be unix time
+  if (req.params.date && !isNaN(req.params.date)) {
+    date = new Date(parseInt(req.params.date)); 
+  }
+
+  //has param non number
+  if (req.params.date && isNaN(req.params.date)) {
+    date = new Date(req.params.date);
+  }
+  
+  if (date == "Invalid Date") {
+    return res.json({ error : "Invalid Date" });
+  }   
+
+  res.json({unix: date.getTime(), utc: date.toUTCString()});
+});
+
+
 
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+var listener = app.listen(5001, function () {
+  console.log('Your app is listening on port ' + 5001);
 });
+
+// var listener = app.listen(process.env.PORT, function () {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
