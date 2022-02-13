@@ -4,6 +4,8 @@
 // init project
 var express = require('express');
 var app = express();
+var dns = require('dns');
+var url = require('url');
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -18,6 +20,12 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded());
+
+// Parse JSON bodies (as sent by API clients)
+app.use(express.json());
+
 app.get("/api/whoami", function (req, res) {
   res.json({
     "ipaddress": req.socket.remoteAddress,
@@ -30,6 +38,34 @@ app.get("/api/whoami", function (req, res) {
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
+
+let urlStore = [];
+app.post('/api/shorturl', function(req, res){
+
+  var adr = req.body.url;
+  var q = url.parse(adr, true);
+
+  dns.lookup(q.host, function (err, addresses, family) {
+    if (err) {
+      res.json({ error: 'invalid url' });
+    }
+    else {
+      let index = urlStore.length + 1;
+      urlStore.push({original_url : req.body.url, short_url : index})
+      res.json({ original_url : req.body.url, short_url : index})
+    }
+  });
+});
+
+app.get('/api/shorturl/:short_url', function(req, res){
+  if (req.params.short_url) {
+    let given = (urlStore.filter(u => u.short_url == req.params.short_url)||[])[0]
+    if (given) {
+      res.redirect(given.original_url);
+    }
+  }
+});
+
 
 app.get("/api/:date?", function (req, res) {
 

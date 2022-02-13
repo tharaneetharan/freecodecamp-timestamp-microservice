@@ -12,6 +12,14 @@
     <h1>Timestamp Microservice</h1>
     <hr />
     <div class="container">
+      <form action="api/shorturl" method="POST">
+        <fieldset>
+          <legend>URL Shortener</legend>
+          <label for="url_input">URL:</label>
+          <input id="url_input" type="text" name="url" placeholder="https://www.freecodecamp.org/" />
+          <input type="submit" value="POST URL" />
+        </fieldset>
+      </form>
       <h3>Example Usage:</h3>
       <ul>
         <li><a href="api/2015-12-25">[project url]/api/2015-12-25</a></li>
