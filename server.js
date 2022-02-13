@@ -177,12 +177,12 @@ app.get('/api/users/:_id/logs', function (req, res) {
   }
 });
 
-app.post('/api/fileanalyse', upload.single('upfile'), (req, res, next) => {
+app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
   const file = req.file
   if (!file) {
     const error = new Error('Please upload a file')
-    error.httpStatusCode = 400
-    return next(error)
+    error.httpStatusCode = 400;
+    res.json({"error": "invalid file"});
   }
   res.json({"name":file.originalname,"type":file.mimetype,"size":file.size});
 })
@@ -219,10 +219,10 @@ app.get("/api/:date?", function (req, res) {
 
 
 // listen for requests :)
-// var listener = app.listen(5001, function () {
-//   console.log('Your app is listening on port ' + 5001);
-// });
-
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+var listener = app.listen(5001, function () {
+  console.log('Your app is listening on port ' + 5001);
 });
+
+// var listener = app.listen(process.env.PORT, function () {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
