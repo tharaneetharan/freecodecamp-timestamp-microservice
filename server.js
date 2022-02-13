@@ -45,6 +45,9 @@ app.post('/api/shorturl', function(req, res){
   var adr = req.body.url;
   var q = url.parse(adr, true);
 
+  if (q.host == null || q.host == "") {
+    return res.json({ error: 'invalid url' });
+  }
   dns.lookup(q.host, function (err, addresses, family) {
     if (err) {
       res.json({ error: 'invalid url' });
@@ -99,10 +102,10 @@ app.get("/api/:date?", function (req, res) {
 
 
 // listen for requests :)
-// var listener = app.listen(5001, function () {
-//   console.log('Your app is listening on port ' + 5001);
-// });
-
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+var listener = app.listen(5001, function () {
+  console.log('Your app is listening on port ' + 5001);
 });
+
+// var listener = app.listen(process.env.PORT, function () {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
